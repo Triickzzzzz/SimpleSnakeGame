@@ -1,7 +1,8 @@
 import tkinter as tk
 from PIL import Image, ImageTk
+import random
 
-SPEED = 200
+SPEED = 120
 
 class Snake(tk.Canvas):
     def __init__(self):
@@ -72,9 +73,32 @@ class Snake(tk.Canvas):
         if self.food_position == self.snake_positions[0]:
             self.snake_positions.append(self.snake_positions[-1])
             self.create_image(self.snake_positions[-1][0], self.snake_positions[-1][1], image=self.snake_body, tag="snake")
+            self.change_food_position()
             self.add_score()
 
+    def change_food_position(self):
+        x_food_position = random.randrange(20, 580, 20)
+        y_food_position = random.randrange(40, 580, 20)
+        self.food_position = (x_food_position, y_food_position)
+        self.coords(self.find_withtag("food") ,self.food_position)
+
+    def check_collision(self):
+        if (self.snake_positions[0][0] < 20 or self.snake_positions[0][0] > 580 or
+                self.snake_positions[0][1] < 40 or self.snake_positions[0][1] > 580):  
+            return True
+
+        check_body_positions = self.snake_positions[1:]
+        for position in check_body_positions:
+            if self.snake_positions[0] == position:
+                return True
+        return False
+
     def update_all(self):
+        if self.check_collision():
+            end_message = f"Game finished!\nYour Score is: {self.score}"
+            self.create_text(300, 300, text=end_message, tag="end_score", fill="#fff", font=("TkDefaultFont",20))
+            return
+
         self.add_body_part()
         self.move_snake()
         self.after(SPEED, self.update_all)
@@ -87,6 +111,9 @@ root.resizable(False, False)
 canvas = Snake()
 canvas.pack()
 root.mainloop()
+
+
+
 
 
 
